@@ -1,9 +1,14 @@
-"""Assemble a trailer from captured frame folders with ffmpeg: grade, fades, captions, title card, sound mix.
+"""Assemble a trailer with ffmpeg: grade, fades, captions, title card, and a voice-forward sound mix.
 
-  python make_trailer.py trailer.json
+  python make_trailer.py trailer.json               build video from frame folders + mix sound
+  python make_trailer.py trailer.json --audio-only  keep the picture of cfg["video"], replace the sound
 
 See ../references/trailer.example.json for every field. Needs ffmpeg on PATH (Python stdlib only).
-Audio cue times can be numbers (seconds) or "shot2+0.6" (0.6 s after shot 2 starts) or "title+0.05".
+
+Audio cue times: seconds, "shot2+0.6" (0.6 s after shot 2 starts) or "title+0.05".
+Cues with "voice": true are loudness-matched, given presence, and the rest of the mix DUCKS under
+them (sidechain compression) so every word is heard, even on phone speakers. The final mix is
+mastered to -14 LUFS / -1.5 dBTP (what YouTube and most platforms play at).
 """
 import json
 import os
@@ -30,17 +35,12 @@ def esc(text):
     return text.replace("\\", "\\\\").replace("'", "’").replace(":", "\\:").replace("%", "\\%")
 
 
-def main(cfg_path):
-    cfg = json.load(open(cfg_path, encoding="utf-8"))
-    base = os.path.dirname(os.path.abspath(cfg_path))
-    rel = lambda p: p if os.path.isabs(p) else os.path.join(base, p)
-    work = rel(cfg.get("work_dir", "trailer_work"))
-    os.makedirs(work, exist_ok=True)
+def build_video(cfg, rel, work):
+    """Render shots + title from frame folders. Returns (video_path, shot_durations)."""
     fps = cfg.get("fps", 30)
     W, H = cfg.get("size", [1920, 1080])
     font, font2 = ff_path(rel(cfg["font_title"])), ff_path(rel(cfg.get("font_body", cfg["font_title"])))
     grade = cfg.get("grade", GRADE)
-
     segs = []
     for i, shot in enumerate(cfg["shots"]):
         folder = rel(shot["frames"])
@@ -82,46 +82,85 @@ def main(cfg_path):
             f.write("file '%s'\n" % p.replace("\\", "/"))
     video = os.path.join(work, "video.mp4")
     run(["-f", "concat", "-safe", "0", "-i", os.path.join(work, "list.txt"), "-c", "copy", video])
+    return video, [d for _, d in segs]
 
-    starts, t = [], lead
-    for _, d in segs:
-        starts.append(t)
-        t += d
-    title_at, total = t, t + td
 
+def mix_audio(cues, rel, starts, title_at, total, out_audio):
+    """Bed (ambience, sfx, music) ducks under the voice bus; master to -14 LUFS."""
     def when(v):
         if isinstance(v, (int, float)):
             return float(v)
         m = re.match(r"(shot(\d+)|title)\s*([+-]\s*[\d.]+)?$", v.replace(" ", ""))
         at = title_at if m.group(1) == "title" else starts[int(m.group(2)) - 1]
-        return at + (float(m.group(3)) if m.group(3) else 0.0)
+        return at + (float(m.group(3).replace(" ", "")) if m.group(3) else 0.0)
 
-    cues = cfg.get("audio", [])
-    out = rel(cfg["output"])
-    if not cues:
-        os.replace(video, out)
-        print("wrote", out, "(no audio)")
-        return
-    args, filt, labels = [], [], []
+    args, filt, bed, vox = [], [], [], []
     for i, c in enumerate(cues):
         if c.get("loop"):
             args += ["-stream_loop", "-1"]
         args += ["-i", rel(c["file"])]
         ms = int(when(c.get("at", 0)) * 1000)
         trim = ",atrim=0:%.2f" % total if c.get("loop") else ""
-        filt.append("[%d:a]aformat=sample_rates=48000:channel_layouts=stereo,volume=%s,adelay=%d|%d%s[a%d]"
-                    % (i, c.get("volume", 1.0), ms, ms, trim, i))
-        labels.append("[a%d]" % i)
-    filt.append("".join(labels) + "amix=inputs=%d:normalize=0,atrim=0:%.2f,afade=t=in:st=0:d=0.8,"
-                "afade=t=out:st=%.2f:d=1.2,alimiter=limit=0.89[out]" % (len(cues), total, total - 1.2))
+        if c.get("voice"):
+            # same loudness for every line, a little presence, no rumble
+            chain = ("loudnorm=I=-16:TP=-2,aresample=48000,highpass=f=90,"
+                     "equalizer=f=2800:t=q:w=1.2:g=4,aformat=sample_rates=48000:channel_layouts=stereo,"
+                     "volume=%s,adelay=%d|%d" % (c.get("volume", 1.0), ms, ms))
+            filt.append("[%d:a]%s[v%d]" % (i, chain, i))
+            vox.append("[v%d]" % i)
+        else:
+            filt.append("[%d:a]aformat=sample_rates=48000:channel_layouts=stereo,volume=%s,adelay=%d|%d%s[b%d]"
+                        % (i, c.get("volume", 1.0), ms, ms, trim, i))
+            bed.append("[b%d]" % i)
+    filt.append("".join(bed) + "amix=inputs=%d:normalize=0,atrim=0:%.2f[bed]" % (len(bed), total))
+    if vox:
+        filt.append("".join(vox) + "amix=inputs=%d:normalize=0,apad,atrim=0:%.2f,asplit=2[vox][key]" % (len(vox), total))
+        # duck the bed about 10 dB while anyone speaks; fast attack, slow release so it breathes
+        filt.append("[bed][key]sidechaincompress=threshold=0.015:ratio=10:attack=15:release=450:makeup=1[ducked]")
+        filt.append("[ducked][vox]amix=inputs=2:normalize=0[mix]")
+    else:
+        filt.append("[bed]anull[mix]")
+    filt.append("[mix]afade=t=in:st=0:d=0.8,afade=t=out:st=%.2f:d=1.2,"
+                "loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000,atrim=0:%.2f[out]" % (total - 1.2, total))
+    run(args + ["-filter_complex", ";".join(filt), "-map", "[out]", "-c:a", "aac", "-b:a", "192k", out_audio])
+
+
+def main(cfg_path, audio_only=False):
+    cfg = json.load(open(cfg_path, encoding="utf-8"))
+    base = os.path.dirname(os.path.abspath(cfg_path))
+    rel = lambda p: p if os.path.isabs(p) else os.path.join(base, p)
+    work = rel(cfg.get("work_dir", "trailer_work"))
+    os.makedirs(work, exist_ok=True)
+    lead = cfg.get("black_lead", 1.0)
+    td = cfg["title"].get("seconds", 4.7)
+
+    if audio_only:
+        video = rel(cfg["video"])                  # an existing trailer: keep its picture
+        durs = cfg["shot_seconds"]                 # lengths of its shots, for "shotN+x" cue times
+    else:
+        video, durs = build_video(cfg, rel, work)
+
+    starts, t = [], lead
+    for d in durs:
+        starts.append(t)
+        t += d
+    title_at, total = t, t + td
+
+    out = rel(cfg["output"])
+    cues = cfg.get("audio", [])
+    if not cues:
+        run(["-i", video, "-c", "copy", "-an", out])
+        print("wrote", out, "(no audio)")
+        return
     audio = os.path.join(work, "audio.m4a")
-    run(args + ["-filter_complex", ";".join(filt), "-map", "[out]", "-c:a", "aac", "-b:a", "192k", audio])
-    run(["-i", video, "-i", audio, "-c:v", "copy", "-c:a", "copy", "-shortest", out])
+    mix_audio(cues, rel, starts, title_at, total, audio)
+    run(["-i", video, "-i", audio, "-map", "0:v", "-map", "1:a", "-c:v", "copy", "-c:a", "copy", "-shortest", out])
     print("wrote %s  (%.1f s, shots start at %s, title at %.2f)" % (out, total, [round(s, 2) for s in starts], title_at))
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    a = [x for x in sys.argv[1:] if x != "--audio-only"]
+    if len(a) != 1:
         print(__doc__)
     else:
-        main(sys.argv[1])
+        main(a[0], audio_only="--audio-only" in sys.argv)

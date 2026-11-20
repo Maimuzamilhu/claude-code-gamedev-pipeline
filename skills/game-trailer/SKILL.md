@@ -50,9 +50,19 @@ writes one MP4 (H.264 + AAC, plays everywhere). See `references/trailer.example.
 
 ## 4. Sound is half the trailer
 
+**Voices must be heard.** The most common trailer mistake: voice lines sit under the ambience
+and vanish on phone and laptop speakers (filtered voices like radio or robot lose their bass and
+disappear first). Mark every spoken cue `"voice": true` in `trailer.json`: the script
+loudness-matches each line, adds presence around 2.8 kHz, and **ducks** everything else about
+10 dB while someone speaks (sidechain compression), then masters the mix to about -14 to -16
+LUFS. To fix the sound of a finished video without re-rendering it, set `"video"` and
+`"shot_seconds"` and run `make_trailer.py trailer.json --audio-only`. Check the result with a
+spectrogram (`ffmpeg -i trailer.mp4 -lavfi showspectrumpic=s=1600x500 spec.png`): speech shows
+as bright stacked stripes between 300 Hz and 3 kHz.
+
 - Bed: 1-2 ambience loops from the game under everything.
 - Hits: a stinger or impact on the reveal and on the title.
-- Voice: one or two lines from the game's characters (see `ai-voice-lines`).
+- Voice: 3-5 short lines from the game's characters, at least one human (see `ai-voice-lines`).
 - Body: heartbeat or breathing for tension games, crowd or music for others.
 - Fade in 0.8 s, fade out 1.2 s, limiter at -1 dB so it is loud but not clipped.
 
@@ -65,5 +75,8 @@ writes one MP4 (H.264 + AAC, plays everywhere). See `references/trailer.example.
 > **Example (HOLD STILL):** 26.5 s, five shots (robot head reveal, a robot walking past the
 > hiding player, walking among powered-down robots, a run that makes a robot turn, an extreme
 > close-up "I see you"), captions "THE MACHINES WON" / "THEY HUNT FOR YOUR MIND" /
-> "STAY SILENT. STAY HIDDEN." / "RUN... AND THEY HEAR YOU", then the title. The mix is
-> 16 cues taken straight from the game's audio folder. Watch it in this repo's README.
+> "STAY SILENT. STAY HIDDEN." / "RUN... AND THEY HEAR YOU", then the title. Five voice lines
+> carry it: the scientist's tape ("Don't run when they come. Hold still."), the factory PA, a
+> child counting to one hundred, and the robot's "I see you" and "Hold still". The first mix had
+> the voices buried 25-30 dB under the ambience; voice cues + ducking fixed it. Watch it in this
+> repo's README.

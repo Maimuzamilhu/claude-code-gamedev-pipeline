@@ -21,11 +21,13 @@
     {"file": "Audio/Heart/heart_beat_rest.wav", "at": 0.3, "volume": 0.6},
     {"file": "Audio/Robot/robot_servo.wav", "at": "shot1+0.4", "volume": 0.9},
     {"file": "Audio/Robot/robot_hydraulic_01.wav", "at": "shot2+0.6", "volume": 0.9},
-    {"file": "Audio/Voice/arc11_search.wav", "at": "shot2+3.0", "volume": 0.9},
+    {"file": "Audio/Voice/grace_3.wav", "at": 1.3, "volume": 1.0, "voice": true},
+    {"file": "Audio/Voice/arc11_search.wav", "at": "shot2+2.0", "volume": 1.0, "voice": true},
+    {"file": "Audio/Voice/theo_1.wav", "at": "shot3+0.8", "volume": 0.95, "voice": true},
     {"file": "Audio/Heart/heart_beat_fast.wav", "at": "shot3+0.2", "volume": 0.75},
     {"file": "Audio/Music/stinger_spotted_01.wav", "at": "shot4+0.5", "volume": 1.0},
-    {"file": "Audio/Voice/arc7_alert.wav", "at": "shot4+1.6", "volume": 1.0},
-    {"file": "Audio/Voice/arc7_1.wav", "at": "shot5+1.5", "volume": 1.15},
+    {"file": "Audio/Voice/arc7_alert.wav", "at": "shot4+1.6", "volume": 1.1, "voice": true},
+    {"file": "Audio/Voice/arc7_1.wav", "at": "shot5+1.2", "volume": 1.15, "voice": true},
     {"file": "Audio/Robot/discharge_00.wav", "at": "title+0.05", "volume": 1.0}
   ]
 }

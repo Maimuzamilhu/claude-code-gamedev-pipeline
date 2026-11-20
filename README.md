@@ -28,8 +28,8 @@ by sight, sound and body heat; you hide, hold your breath and escape a two-floor
 in it was made with the workflow in this repo.
 
 <p align="center">
-  <a href="media/trailer.mp4"><img src="media/trailer-preview.gif" alt="HOLD STILL trailer preview - click to watch with sound" width="80%"></a><br>
-  <sub><b>▶ Click to watch the 26-second trailer with sound</b> - captured at a locked 30 fps and mixed with the game's own AI voices, ambience and stingers (skill: <code>game-trailer</code>).</sub>
+  <a href="https://github.com/Maimuzamilhu/claude-code-gamedev-pipeline/raw/main/media/trailer.mp4"><img src="media/trailer-preview.gif" alt="HOLD STILL trailer preview - click to watch with sound" width="80%"></a><br>
+  <sub><b>▶ Click to watch the 26-second trailer with sound</b> - captured at a locked 30 fps and voiced by the game's own AI characters (a scientist's tape, a child counting, the robots), with ambience that ducks under every line (skill: <code>game-trailer</code>).</sub>
 </p>
 
 <table>
