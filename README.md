@@ -27,13 +27,10 @@ by sight, sound and body heat; you hide, hold your breath and escape a two-floor
 17 objectives, 3 endings. Every model, sound, voice line, enemy behaviour, trailer and screenshot
 in it was made with the workflow in this repo.
 
-<p align="center">
- 
-
 https://github.com/user-attachments/assets/30e4f00f-de7a-4dab-8979-d21c04580316
 
-
-  <sub><b>▶ Click to watch the 26-second trailer with sound</b> - captured at a locked 30 fps and voiced by the game's own AI characters (a scientist's tape, a child counting, the robots), with ambience that ducks under every line (skill: <code>game-trailer</code>).</sub>
+<p align="center">
+  <sub><b>▶ Press play for sound.</b> 26-second trailer captured at a locked 30 fps and voiced by the game's own AI characters (a scientist's tape, a child counting, the robots), with ambience that ducks under every line (skill: <code>game-trailer</code>). <a href="media/trailer.mp4">Download the MP4</a>.</sub>
 </p>
 
 <table>
