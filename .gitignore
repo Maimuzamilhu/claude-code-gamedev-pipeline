@@ -1,0 +1,4 @@
+__pycache__/
+*.pyc
+.unity_mcp_session
+.DS_Store

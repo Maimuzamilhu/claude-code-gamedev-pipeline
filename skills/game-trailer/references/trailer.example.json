@@ -1,0 +1,31 @@
+{
+  "output": "trailer.mp4",
+  "work_dir": "trailer_work",
+  "fps": 30,
+  "size": [1920, 1080],
+  "font_title": "Fonts/Rajdhani-Bold.ttf",
+  "font_body": "Fonts/Barlow-Medium.ttf",
+  "black_lead": 1.0,
+  "shots": [
+    {"frames": "Recordings/shot01", "caption": "THE MACHINES WON"},
+    {"frames": "Recordings/shot02", "caption": "THEY HUNT FOR YOUR MIND"},
+    {"frames": "Recordings/shot03", "caption": "STAY SILENT. STAY HIDDEN."},
+    {"frames": "Recordings/shot04", "caption": "RUN... AND THEY HEAR YOU"},
+    {"frames": "Recordings/shot05", "caption": ""}
+  ],
+  "title": {"text": "HOLD STILL", "tagline": "AI APOCALYPSE  ·  SURVIVAL HORROR", "seconds": 4.7,
+            "accent": true, "accent_color": "0xD8261E"},
+  "audio": [
+    {"file": "Audio/Ambience/amb_plant.wav", "at": 0, "volume": 0.55, "loop": true},
+    {"file": "Audio/Ambience/amb_drone.wav", "at": 0, "volume": 0.45, "loop": true},
+    {"file": "Audio/Heart/heart_beat_rest.wav", "at": 0.3, "volume": 0.6},
+    {"file": "Audio/Robot/robot_servo.wav", "at": "shot1+0.4", "volume": 0.9},
+    {"file": "Audio/Robot/robot_hydraulic_01.wav", "at": "shot2+0.6", "volume": 0.9},
+    {"file": "Audio/Voice/arc11_search.wav", "at": "shot2+3.0", "volume": 0.9},
+    {"file": "Audio/Heart/heart_beat_fast.wav", "at": "shot3+0.2", "volume": 0.75},
+    {"file": "Audio/Music/stinger_spotted_01.wav", "at": "shot4+0.5", "volume": 1.0},
+    {"file": "Audio/Voice/arc7_alert.wav", "at": "shot4+1.6", "volume": 1.0},
+    {"file": "Audio/Voice/arc7_1.wav", "at": "shot5+1.5", "volume": 1.15},
+    {"file": "Audio/Robot/discharge_00.wav", "at": "title+0.05", "volume": 1.0}
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "name": "claude-code-gamedev-pipeline",
+  "owner": {
+    "name": "Muzzamil Khalid",
+    "url": "https://github.com/Maimuzamilhu"
+  },
+  "metadata": {
+    "description": "Make a complete 3D game with Claude Code: Unity editor bridge, Blender modular kits, free CC0 assets, enemy AI, local AI voices (Hugging Face Kokoro), free game audio, work orders, trailer and key art. Built and tested on the horror game HOLD STILL.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "gamedev-pipeline",
+      "description": "All 10 game dev skills: start-here planner, Unity editor bridge, Blender game kit, CC0 asset sourcing, game enemy AI, AI voice lines, free game audio, work orders, game trailer, game key art.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/gamedev-pipeline",
+        "./skills/unity-editor-bridge",
+        "./skills/blender-game-kit",
+        "./skills/cc0-asset-sourcing",
+        "./skills/game-enemy-ai",
+        "./skills/ai-voice-lines",
+        "./skills/free-game-audio",
+        "./skills/game-dev-work-orders",
+        "./skills/game-trailer",
+        "./skills/game-key-art"
+      ]
+    }
+  ]
+}
